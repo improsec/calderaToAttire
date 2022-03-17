@@ -2,6 +2,7 @@ import json
 import sys
 import datetime
 import base64
+import re
 
 
 
@@ -38,15 +39,15 @@ def getTarget():
 
 #Takes the ability and extract the execution data.
 def execData(data):
-    #print(inp)
     execDict = dict()
     execDict['execution-command'] = data.get('name')
     execDict['execution-id'] = "parag00n drip" #TODO: figure out what we want here. Hash dict?
     execDict['execution-source'] = "Caldera - " + data.get('name') #"Caldera - Improsec"
     execDict['execution-category'] = { "name" : "Caldera - Improsec", "abbreviation" : "ci"}
     execDict['target'] = getTarget()
-    execDict['time-generated'] = data.get('finish')
-    print(data.get('pid'))
+    execDict['time-generated'] = data.get('finish') #FIX: need to work no matter what
+    if execDict['time-generated'] == None:
+        execDict['time-generated'] = "0000-00-00T00:00:00.000Z"
     return execDict
 
 def steps(step):
@@ -101,11 +102,9 @@ def main(arg):
     # Create output json for each ability and dump them to files.
         
     out = outputJson(data, abilities_dict)
-    out_file = open("BigTest" + ".json", "w")
+    out_file = open(re.split(', |_|-|!', arg)[0] + ".json", "w")
     json.dump(out, out_file, indent = 4)
     return 1
-
-
 
 
 
