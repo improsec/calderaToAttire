@@ -5,7 +5,7 @@ This project is aimed at taking Operation results from caldera and converting th
 ### How to use
 First run your caldera operation and generate the full operation report in the json format.
 
-CalderaToAttire.py is used to take an entire operation and convert to a single ATTiRe file, directly meaning it will be a single campaign in VECTR. CalderaAbilitiesToAttire.py is used to take each ability in an operation to an individual ATTiRe file, meaning we get multiple campaigns in VECTR.
+CalderaToAttire.py is used to take an entire agent and convert to a single ATTiRe file. Meaning it will be a single campaign in VECTR for each agent.
 
 To run the file, run:
 ```
