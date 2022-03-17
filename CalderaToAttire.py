@@ -7,19 +7,15 @@ import re
 
 
 #Split up the tactics in individual sessions, we can make new files.
-def splitTactics(fulljson):
+def splitAgents(fulljson):
     resultDict = dict()
 
     #Fetch steps from the json
     outersteps = fulljson['steps']
-    for step in outersteps.keys():
-        innerstepkey = step
-    innersteps = outersteps[innerstepkey]['steps']
+    agents = outersteps.keys()
 
-
-    # Make dictionary of step for each ability id.
-    for step in innersteps:
-        resultDict[step['ability_id']] = step
+    for agent in agents:
+        resultDict[agent] = outersteps[agent]['steps']
     return resultDict
         
 
@@ -34,11 +30,11 @@ def getTarget():
     return targetDict
 
 #Takes the ability and extract the execution data.
-def execData(data):
+def execData(data, agent):
     execDict = dict()
     execDict['execution-command'] = data['name']
-    execDict['execution-id'] = "parag00n drip" #TODO: figure out what we want here. Hash dict?
-    execDict['execution-source'] = "Caldera - " + data['name'] #"Caldera - Improsec"
+    execDict['execution-id'] = agent #Might be a better possbility
+    execDict['execution-source'] = "Caldera - " + data['name'] + " - " + agent
     execDict['execution-category'] = { "name" : "Caldera - Improsec", "abbreviation" : "ci"}
     execDict['target'] = getTarget()
     execDict['time-generated'] = data['finish'] #FIX: need to work no matter what
@@ -46,11 +42,11 @@ def execData(data):
         execDict['time-generated'] = "0000-00-00T00:00:00.000Z"
     return execDict
 
-def steps(step):
+def steps(step, index):
     stepDict = dict()
     stepDict['command'] = base64.b64decode(step['command']).decode('utf-8')
     stepDict['executor'] = step['executor']
-    stepDict['order'] = 1         #TODO: fix if multiple steps.
+    stepDict['order'] = index         #TODO: fix if multiple steps.
     date_time_str = step['agent_reported_time']
     x = datetime.datetime.strptime(date_time_str, "%Y-%m-%d %H:%M:%S")
     y = x.isoformat() + ".000Z"
@@ -62,29 +58,34 @@ def steps(step):
 
 #Multiple abilities in this? Unsure. Atm this just makes a procedure for one step
 #Takes the ability and extracts all procedure data.
-def procs(step):
+def procs(step, index):
     procDict = dict()
     procDict['procedure-name'] = step['name']
     procDict['procedure-description'] = step['description']
     procDict['procedure-id'] = { "type" : "improsec", "id" : "webForKenni"}       #TODO: Fix this?
     procDict['mitre-technique-id'] = step['attack']['technique_id']
-    procDict['order'] = 1             #TODO: fix if we want multiple procedures.
-    procDict['steps'] = steps(step)
+    procDict['order'] = index
+    procDict['steps'] = steps(step, index)
     return procDict
 
 
 
-def outputJson(data, steps):
+def outputJson(data, agentDict, agent):
     #Create dict and inset version, execution data and procedures.
     output = dict()
     output['attire-version'] = "1.1"
-    output['execution-data'] = execData(data)
+    output['execution-data'] = execData(data, agent)
     output['procedures'] = []
-    for step in steps:
-        output['procedures'].append(procs(steps[step]))
+    for index, ability in enumerate(agentDict):
+        output['procedures'].append(procs(ability, index))
     return output
 
-    
+
+def outputAgent(fulldata, agentDict, agent):
+    out = outputJson(fulldata, agentDict, agent)
+    out_file = open("ATTiRe - " + agent +".json", "w")
+    json.dump(out, out_file, indent = 4)
+    return
 
 
 def main(arg):
@@ -92,14 +93,10 @@ def main(arg):
 
     data = json.load(f)
 
-    #split input into seperate abilities
-    abilities_dict = splitTactics(data)
+    agentDict = splitAgents(data)
+    for agent in agentDict:
+        outputAgent(data, agentDict[agent], agent)
     
-    # Create output json for each ability and dump them to files.
-        
-    out = outputJson(data, abilities_dict)
-    out_file = open(re.split(', |_|-|!', arg)[0] + ".json", "w")
-    json.dump(out, out_file, indent = 4)
     return 1
 
 
