@@ -19,7 +19,7 @@ def splitAgents(fulljson):
         
 
 #TODO: This all need to be decided on.
-#Shows what target the tactic is being executed on.
+#Shows what target the ability is being executed on.
 def getTarget():
     targetDict = dict()
     targetDict['host'] = "parag00n"
