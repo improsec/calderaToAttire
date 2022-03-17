@@ -28,7 +28,7 @@ def splitTactics(fulljson):
 
 #TODO: This all need to be decided on.
 #Shows what target the tactic is being executed on.
-def getTarget(step):
+def getTarget():
     targetDict = dict()
     targetDict['host'] = "parag00n"
     targetDict['ip'] = "1.1.1.1"
@@ -37,16 +37,16 @@ def getTarget(step):
     return targetDict
 
 #Takes the ability and extract the execution data.
-def execData(step):
+def execData(data):
     #print(inp)
     execDict = dict()
-    execDict['execution-command'] = base64.b64decode(step.get('command')).decode('utf-8')
+    execDict['execution-command'] = data.get('name')
     execDict['execution-id'] = "parag00n drip" #TODO: figure out what we want here. Hash dict?
-    execDict['execution-source'] = "Caldera - " + step.get('attack').get('technique_id') #"Caldera - Improsec"
+    execDict['execution-source'] = "Caldera - " + data.get('name') #"Caldera - Improsec"
     execDict['execution-category'] = { "name" : "Caldera - Improsec", "abbreviation" : "ci"}
-    
-    execDict['target'] = getTarget(step)
-    execDict['time-generated'] = step.get('agent_reported_time')
+    execDict['target'] = getTarget()
+    execDict['time-generated'] = data.get('finish')
+    print(data.get('pid'))
     return execDict
 
 def steps(step):
@@ -73,16 +73,18 @@ def procs(step):
     procDict['mitre-technique-id'] = step.get('attack').get('technique_id')
     procDict['order'] = 1             #TODO: fix if we want multiple procedures.
     procDict['steps'] = steps(step)
-    return [procDict]
+    return procDict
 
 
 
-def outputJson(step):
+def outputJson(data, steps):
     #Create dict and inset version, execution data and procedures.
     output = dict()
     output['attire-version'] = "1.1"
-    output['execution-data'] = execData(step)
-    output['procedures'] = procs(step)
+    output['execution-data'] = execData(data)
+    output['procedures'] = []
+    for step in steps:
+        output['procedures'].append(procs(steps[step]))
     return output
 
     
@@ -97,10 +99,10 @@ def main(arg):
     abilities_dict = splitTactics(data)
     
     # Create output json for each ability and dump them to files.
-    for ability in abilities_dict:
-        out = outputJson(abilities_dict[ability])
-        out_file = open(ability + ".json", "w")
-        json.dump(out, out_file, indent = 4)
+        
+    out = outputJson(data, abilities_dict)
+    out_file = open("BigTest" + ".json", "w")
+    json.dump(out, out_file, indent = 4)
     return 1
 
 
