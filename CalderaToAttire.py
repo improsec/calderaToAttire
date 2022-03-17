@@ -11,19 +11,17 @@ def splitTactics(fulljson):
     resultDict = dict()
 
     #Fetch steps from the json
-    outersteps = fulljson.get('steps')
+    outersteps = fulljson['steps']
     for step in outersteps.keys():
         innerstepkey = step
-    innersteps = outersteps.get(innerstepkey).get('steps')
+    innersteps = outersteps[innerstepkey]['steps']
 
 
     # Make dictionary of step for each ability id.
     for step in innersteps:
-        resultDict[step.get('ability_id')] = step
+        resultDict[step['ability_id']] = step
     return resultDict
         
-
-    #print (resultDict.get('90c2efaa-8205-480d-8bb6-61d90dbaf81b'))
 
 #TODO: This all need to be decided on.
 #Shows what target the tactic is being executed on.
@@ -38,22 +36,22 @@ def getTarget():
 #Takes the ability and extract the execution data.
 def execData(data):
     execDict = dict()
-    execDict['execution-command'] = data.get('name')
+    execDict['execution-command'] = data['name']
     execDict['execution-id'] = "parag00n drip" #TODO: figure out what we want here. Hash dict?
-    execDict['execution-source'] = "Caldera - " + data.get('name') #"Caldera - Improsec"
+    execDict['execution-source'] = "Caldera - " + data['name'] #"Caldera - Improsec"
     execDict['execution-category'] = { "name" : "Caldera - Improsec", "abbreviation" : "ci"}
     execDict['target'] = getTarget()
-    execDict['time-generated'] = data.get('finish') #FIX: need to work no matter what
+    execDict['time-generated'] = data['finish'] #FIX: need to work no matter what
     if execDict['time-generated'] == None:
         execDict['time-generated'] = "0000-00-00T00:00:00.000Z"
     return execDict
 
 def steps(step):
     stepDict = dict()
-    stepDict['command'] = base64.b64decode(step.get('command')).decode('utf-8')
-    stepDict['executor'] = step.get('executor')
+    stepDict['command'] = base64.b64decode(step['command']).decode('utf-8')
+    stepDict['executor'] = step['executor']
     stepDict['order'] = 1         #TODO: fix if multiple steps.
-    date_time_str = step.get('agent_reported_time')
+    date_time_str = step['agent_reported_time']
     x = datetime.datetime.strptime(date_time_str, "%Y-%m-%d %H:%M:%S")
     y = x.isoformat() + ".000Z"
     stepDict['time-start'] = y
@@ -66,10 +64,10 @@ def steps(step):
 #Takes the ability and extracts all procedure data.
 def procs(step):
     procDict = dict()
-    procDict['procedure-name'] = step.get('name')
-    procDict['procedure-description'] = step.get('description')
+    procDict['procedure-name'] = step['name']
+    procDict['procedure-description'] = step['description']
     procDict['procedure-id'] = { "type" : "improsec", "id" : "webForKenni"}       #TODO: Fix this?
-    procDict['mitre-technique-id'] = step.get('attack').get('technique_id')
+    procDict['mitre-technique-id'] = step['attack']['technique_id']
     procDict['order'] = 1             #TODO: fix if we want multiple procedures.
     procDict['steps'] = steps(step)
     return procDict
