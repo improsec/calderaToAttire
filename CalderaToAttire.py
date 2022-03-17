@@ -2,7 +2,6 @@ import json
 import sys
 import datetime
 import base64
-import re
 
 
 
@@ -37,7 +36,7 @@ def execData(data, agent):
     execDict['execution-source'] = "Caldera - " + data['name'] + " - " + agent
     execDict['execution-category'] = { "name" : "Caldera - Improsec", "abbreviation" : "ci"}
     execDict['target'] = getTarget()
-    execDict['time-generated'] = data['finish'] #FIX: need to work no matter what
+    execDict['time-generated'] = data['finish'] 
     if execDict['time-generated'] == None:
         execDict['time-generated'] = "0000-00-00T00:00:00.000Z"
     return execDict
@@ -46,18 +45,20 @@ def steps(step, index):
     stepDict = dict()
     stepDict['command'] = base64.b64decode(step['command']).decode('utf-8')
     stepDict['executor'] = step['executor']
-    stepDict['order'] = index         #TODO: fix if multiple steps.
+    stepDict['order'] = index
     date_time_str = step['agent_reported_time']
     x = datetime.datetime.strptime(date_time_str, "%Y-%m-%d %H:%M:%S")
     y = x.isoformat() + ".000Z"
     stepDict['time-start'] = y
     stepDict['time-stop'] = y
-    stepDict['output'] = [{ "content" : "todo", "level" : "no info", "type" : "no info"}]
+    output = "Empty"
+    if 'output' in step.keys(): 
+        output = step['output']
+    stepDict['output'] = [{ "content" : output, "level" : "no info", "type" : "no info"}]
     return [stepDict]
 
 
-#Multiple abilities in this? Unsure. Atm this just makes a procedure for one step
-#Takes the ability and extracts all procedure data.
+#Takes one ability and extracts one procedure.
 def procs(step, index):
     procDict = dict()
     procDict['procedure-name'] = step['name']
@@ -69,9 +70,8 @@ def procs(step, index):
     return procDict
 
 
-
+# Create the output json for a single agent.
 def outputJson(data, agentDict, agent):
-    #Create dict and inset version, execution data and procedures.
     output = dict()
     output['attire-version'] = "1.1"
     output['execution-data'] = execData(data, agent)
@@ -80,7 +80,7 @@ def outputJson(data, agentDict, agent):
         output['procedures'].append(procs(ability, index))
     return output
 
-
+# Loops over all agents and outputs them to files.
 def outputAgent(fulldata, agentDict, agent):
     out = outputJson(fulldata, agentDict, agent)
     out_file = open("ATTiRe - " + agent +".json", "w")
@@ -97,7 +97,7 @@ def main(arg):
     for agent in agentDict:
         outputAgent(data, agentDict[agent], agent)
     
-    return 1
+    return
 
 
 
