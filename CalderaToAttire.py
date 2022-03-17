@@ -12,15 +12,13 @@ def splitTactics(fulljson):
 
     #Fetch steps from the json
     outersteps = fulljson.get('steps')
-    for i in outersteps.keys():
-        innerstepkey = i
+    for step in outersteps.keys():
+        innerstepkey = step
     innersteps = outersteps.get(innerstepkey).get('steps')
 
 
     # Make dictionary of step for each ability id.
-    techniques = []
     for step in innersteps:
-        techniques.append(step.get('ability_id'))
         resultDict[step.get('ability_id')] = step
     return resultDict
         
