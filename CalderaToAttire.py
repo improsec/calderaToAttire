@@ -30,6 +30,7 @@ def getTarget(step):
     targetDict['ip'] = "1.1.1.1"
     targetDict['path'] = "PATH=C:"
     targetDict['user'] = "parag00n - improg00n"
+    return targetDict
 
 #Takes the ability and extract the execution data.
 def execData(step):
@@ -49,10 +50,10 @@ def steps(step):
     stepDict = dict()
     stepDict['command'] = step.get('command') #TODO: decode base64
     stepDict['executor'] = step.get('executor')
-    stepDict['order'] = "1"         #TODO: fix if multiple steps.
+    stepDict['order'] = 1         #TODO: fix if multiple steps.
     stepDict['time-start'] = step.get('agent_reported_time')
     stepDict['time-stop'] = "unknown"
-    stepDict['output'] = { "content" : "todo", "level" : "no info", "type" : "no info"}
+    stepDict['output'] = [{ "content" : "todo", "level" : "no info", "type" : "no info"}]
     return [stepDict]
 
 
@@ -63,7 +64,7 @@ def procs(step):
     procDict['procedure-description'] = ""
     procDict['procedure-id'] = { "type" : "improsec", "id" : "webForKenni"}       #TODO: Fix this?
     procDict['mitre-technique-id'] = step.get('attack').get('technique_id')
-    procDict['order'] = "1"             #TODO: fix if we want multiple procedures.
+    procDict['order'] = 1             #TODO: fix if we want multiple procedures.
     procDict['steps'] = steps(step)
     return [procDict]
 
