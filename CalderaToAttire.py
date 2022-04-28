@@ -23,7 +23,7 @@ def splitAgents(fulljson):
 def getTarget():
     targetDict = dict()
     targetDict['host'] = "parag00n"
-    targetDict['ip'] = "1.1.1.1"
+    targetDict['ip'] = "0.0.0.0"
     targetDict['path'] = "PATH=C:"
     targetDict['user'] = "parag00n - improg00n"
     return targetDict
@@ -47,10 +47,21 @@ def steps(step, index):
     stepDict['executor'] = step['executor']
     stepDict['order'] = index
     date_time_str = step['agent_reported_time']
-    x = datetime.datetime.strptime(date_time_str, "%Y-%m-%d %H:%M:%S")
-    y = x.isoformat() + ".000Z"
-    stepDict['time-start'] = y
-    stepDict['time-stop'] = y
+    try:
+        date = datetime.datetime.strptime(date_time_str, "%Y-%m-%d %H:%M:%S")
+        time_format = date.isoformat() + ".000Z"
+    except:
+        try:
+            date = datetime.datetime.strptime(date_time_str, "%Y-%m-%dT%H:%M:%SZ")
+            time_format = date.isoformat() + ".000Z"
+        except:
+            print("The CalderaToAttire is not capable of processing the timeformat in agent_reported_time.")
+            print("Please report this on the github: https://github.com/improsec/calderaToAttire/issues")
+            print("Preferably with the entire json file and report your time format: " + date_time_str)
+            exit()
+
+    stepDict['time-start'] = time_format
+    stepDict['time-stop'] = time_format
     output = "Empty"
     if 'output' in step.keys(): 
         output = step['output']
@@ -83,7 +94,7 @@ def outputJson(data, agentDict, agent):
 # Loops over all agents and outputs them to files.
 def outputAgent(fulldata, agentDict, agent):
     out = outputJson(fulldata, agentDict, agent)
-    out_file = open("ATTiRe - " + agent +".json", "w")
+    out_file = open("ATTiRe " + fulldata['name'] + "_" + agent +".json", "w")
     json.dump(out, out_file, indent = 4)
     return
 
