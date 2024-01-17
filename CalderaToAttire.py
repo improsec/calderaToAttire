@@ -64,7 +64,7 @@ def steps(step, index):
     stepDict['time-stop'] = time_format
     output = "Empty"
     if 'output' in step.keys(): 
-        output = step['output']
+        output = step['output']['stdout'] + step['output']['stderr']
     stepDict['output'] = [{ "content" : output, "level" : "no info", "type" : "no info"}]
     return [stepDict]
 
