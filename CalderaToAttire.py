@@ -43,7 +43,13 @@ def execData(data, agent):
 
 def steps(step, index):
     stepDict = dict()
-    stepDict['command'] = base64.b64decode(step['command']).decode('utf-8')
+    
+    try:
+        stepDict['command'] = base64.b64decode(step['command']).decode('utf-8')
+    except Exception as e:
+        # Newer versions of Caldera don't base64 encode by default
+        stepDict['command'] = step['command']
+        
     stepDict['executor'] = step['executor']
     stepDict['order'] = index
     date_time_str = step['agent_reported_time']
